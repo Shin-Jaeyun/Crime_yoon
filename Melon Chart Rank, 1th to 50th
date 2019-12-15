@@ -1,0 +1,21 @@
+library(RSelenium) 
+library(rvest) 
+
+remDr <- remoteDriver(remoteServerAddr = 'localhost', 
+                      port = 4446L, # 포트번호 입력 
+                      browserName = "chrome") 
+
+remDr$open() 
+
+remDr$navigate("https://www.melon.com/chart/month/index.htm?classCd=GN1500#params%5Bidx%5D=1&params%5BrankMonth%5D=201911&params%5BisFirstDate%5D=false&params%5BisLastDate%5D=true")
+
+frames = remDr$findElements(using = "xpath", value = '//*[@id="frm"]/div/table/tbody') 
+
+print(frames)
+
+list=remDr$findElements(using = 'xpath', value ='//*[@id="frm"]/div/table/tbody') 
+list_a=unlist(lapply(list,function(x){x$getElementText()})) 
+
+list_a 
+                                                        
+remDr$close()
