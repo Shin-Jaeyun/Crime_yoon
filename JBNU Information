@@ -1,0 +1,20 @@
+library(rvest)
+
+url <- "https://career.jbnu.ac.kr/bbs/board.php?bo_table=notice&page=1"
+
+page <- 2:4
+pages=paste0(url, page, sep='')
+
+extract = function(page_url) {
+  html <- read_html(page_url) 
+  table <- html %>% html_nodes("table")
+  td <- table %>% html_nodes("td") 
+  text <- td %>% html_text() 
+  text <- gsub("(\r)(\n)(\t)*", "", text)
+  df <- as.data.frame(matrix(text, nrow=10, ncol=5, byrow=TRUE))
+}
+
+mat <- extract(pages[1])
+for(i in 2:length(page) ) mat <- rbind(mat, extract(pages[i]))
+
+mat
