@@ -1,0 +1,108 @@
+<주제 : 에브리타임 HOT 게시판 시간대별 분석>
+
+#사이트 소개
+: 전국 400개 대학을 지원하는 대표적인 대학교 커뮤니티로 대학생들에게 편의 제공을 위해 시간표 작성 및 학업 관리, 학교 교내외 정보를 관리하는 사이트입니다.
+
+#수집한 데이터의 활용
+: 에브리타임 HOT 게시판의 게시물 시간을 분석함으로써 에브리타임 사이트를 보다 효율적으로 사용할 수 있게 될 것입니다.
+
+#수집한 데이터의 가치
+: 에브리타임 HOT 게시판의 게시물은 공감 수 10개 이상을 받으면 자동 선정되는 방식입니다. 
+  쉽게 생각되지만 정작 익명의 글에 공감을 표현하는 일은 적습니다. 
+  그러므로 HOT 게시판에 선정되기도 쉽지 않습니다. 
+  따라서, 이러한 조건은 자연스레 상업적 광고 및 판매, 욕설 및 비하, 도배성의 데이터를 걸러내는 환경을 조성하여 예측에 혼동을 주는 “이상치”로부터 벗어나게 합니다.
+
+#데이터
+데이터 기간 : 2018년2월~2019년12월
+데이터 정보 : 시간
+데이터 크기 : 
+
+#분석방법 및 결과...
+
+#데이터 가져오기(번외)
+library(RSelenium) 
+library(rvest) 
+
+remDr <- remoteDriver(remoteServerAddr = 'localhost',
+                      port = 4446L,                   # 포트번호 입력 
+                      browserName = "chrome")         # 크롬 브라우저 활용
+
+remDr$open() 
+
+remDr$navigate("https://everytime.kr/hotarticle") #에브리타임 HOT 게시판 접속하기
+
+id<- remDr$findElement(using='xpath',value='//*[@id="container"]/form/p[1]/input') 
+pw<- remDr$findElement(using='xpath',value='//*[@id="container"]/form/p[2]/input') 
+btn<-remDr$findElement(using='xpath',value='//*[@id="container"]/form/p[3]/input') 
+
+id$setElementAttribute("value","tlswodbs0510") #실제 아이디
+pw$setElementAttribute("value","wodbs0510")    #실제 비밀번호
+btn$clickElement()                             #로그인 버튼
+
+#1페이지 꺼내오기 
+##() [page] (다음)
+
+frames = remDr$findElements(using = "xpath", 
+                            value = '//*[@id="container"]/div/article/a/time')
+
+list=remDr$findElements(using = 'xpath', value ='//*[@id="container"]/div/article/a/time') 
+list_a=unlist(lapply(list,function(x){x$getElementText()})) 
+
+print(list_a)
+
+btn<-remDr$findElement(using='xpath', value='//*[@id="container"]/div[2]/div[2]/a') #(다음)버튼으로 페이지 변경
+btn$clickElement() 
+
+#2페이지 꺼내오기 
+##(이전) [page] (다음)
+
+frames = remDr$findElements(using = "xpath", 
+                            value = '//*[@id="container"]/div/article/a/time')
+
+list=remDr$findElements(using = 'xpath', value ='//*[@id="container"]/div/article/a/time') 
+list_a=unlist(lapply(list,function(x){x$getElementText()})) 
+
+print(list_a)
+
+btn<-remDr$findElement(using='xpath', value='//*[@id="container"]/div[2]/div[2]/a[2]') 
+btn$clickElement() 
+
+#3페이지 이상 꺼내오기
+##(처음) (이전) [page] (다음)
+
+i <- 0
+
+while (i<=20) {
+  
+  print(i) #루프문이 잘 수행되고 있는지 확인
+           ##수행하면 0, 1까지만 뽑히는 걸 보니 frames에 페이지 변경에 있어서 오류가 있나보다...
+  
+  frames = remDr$findElements(using = "xpath", 
+                              value = '//*[@id="container"]/div[2]/article/a/time')
+  
+  print(frames) #frames를 프린트함으로 다음 페이지를 꺼내오는 딜레이 시간을 위한 존재
+                ##어디까지나 제 생각입니다...
+  
+  list=remDr$findElements(using = 'xpath', value ='//*[@id="container"]/div[2]/article/a/time') 
+  list_a=unlist(lapply(list,function(x){x$getElementText()})) 
+  
+  print(list_a)
+  
+  btn<-remDr$findElement(using='xpath',value='//*[@id="container"]/div[2]/div[2]/a[3]') 
+  btn$clickElement() 
+  
+  i <- i+1
+  
+}
+
+remDr$close() #3페이지 이후 데이터 불러오기에서 막혔습니다...
+
+#소감
+: 힘들지 않았다면 거짓말이겠지만 그래도 한 학기 동안 제일 배울 게 많은 강의였다는 생각이 듭니다.
+  기존의 얄팍한 통계 지식에 머물러있던 제게 실기란 넘기 힘든 벽과 같았습니다. 
+  비록 아직까지 그 과정에 서 있는 건 마찬가지지만 과제를 하나씩 끝내가며 "나도 할 수 있다." 라는 희망이 보였습니다.
+  실력이 부족해서 강의 내내 헤매기도 하고 옆자리 친구들과 상의해가며 애쓰던 모습이 돌이켜보면 추억으로 회상할 수 있을 것 같습니다.
+  저의 부족함을 꾸준한 시간 투자로 하여금 채워나가 이번 학기 바라던 저로 하루 빨리 거듭났으면 하는 심정입니다.
+  
+#포부
+: 제가 미처 완성하지 못한 이 과제는 방학 중 틈틈이 공부해서 끝낼 예정입니다...
